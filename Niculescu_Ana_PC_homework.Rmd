@@ -94,25 +94,29 @@ y_test <- theta[1] + theta[2] * 20 + theta[3] * 80
 
 
 ```{r}
-basic.cv <- function(dataset, var) {
-  n_folds = 4
+basic.cv2 <- function(dataset, var) {
+  n_folds = 10
   dataset_copy <- dataset
   fold_size <- as.numeric(nrow(dataset) / n_folds)
-  dataset_split <- data.frame(test1 = numeric(),
-                              test2 = numeric(),
-                              admitted = logical())
+  folds <- c()
 	for (fold in 1:n_folds) { 
-	  fold_r = data.frame(test1 = numeric(),
-                              test2 = numeric(),
-                              admitted = logical())
-	  while(fold < fold_size) {
-	    index <- sample(1:nrow(dataset), 1)
-	    fold_r <- rbind(fold_r, dataset[index, ]) 
-	    fold = fold + 1
+	  fold_r = c()
+	  n <- 0
+	  while(n < fold_size) {
+	    fold_r <- c(fold_r, fold)
+	    n <- n + 1
 	  }
-	  dataset_split <- rbind(dataset_split, fold_r)
-	  dataset_split
- }
+	 folds <- c(folds, fold_r)
+	}
+  
+  for(i in 1:10){
+    #Segement your data by fold using the which() function 
+    test_indexes <- which(folds==i, arr.ind=TRUE)
+    test_data <- dataset[test_indexes, ]
+    train_data <- dataset[-test_indexes, ]
+    #Use the test and train data partitions however you desire...
+    
+  }
 }
 
 x <- basic.cv(exam_df, 1)
@@ -164,6 +168,25 @@ mle <- function(x, y) {
 
 
 ```{r}
+basic.cv <- function(dataset, var) {
+  #Randomly shuffle the data
+  dataset <- dataset[sample(nrow(dataset)),]
+  
+  #Create 10 equally size folds
+  folds <- cut(seq(1, nrow(dataset)), breaks=10, labels=FALSE)
+   #Perform 10 fold cross validation
+  for(i in 1:10){
+    #Segement your data by fold using the which() function 
+    test_indexes <- which(folds==i, arr.ind=TRUE)
+    test_data <- dataset[testIndexes, ]
+    train_data <- dataset[-testIndexes, ]
+    #Use the test and train data partitions however you desire...
+  }
+ folds
+}
+
+y <- basic.cv(exam_df)
+ 
 cv <- function(sample, var) {
   
 }
