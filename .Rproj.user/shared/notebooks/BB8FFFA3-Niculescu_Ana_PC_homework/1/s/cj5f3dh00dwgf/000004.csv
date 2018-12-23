@@ -1,5 +1,0 @@
-"0","# cleaning the data 
-exam_x <- exam_x[ ,c(4, 7)]
-"
-"2","Error in `[.data.frame`(exam_x, , c(4, 7)) : undefined columns selected
-"

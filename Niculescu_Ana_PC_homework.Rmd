@@ -101,12 +101,13 @@ basic.cv <- function(dataset, var) {
   dataset_split <- data.frame(test1 = numeric(),
                               test2 = numeric(),
                               admitted = logical())
-  browser()
-	for (i in 1:n_folds) { 
-	  fold = 0
+	for (fold in 1:n_folds) { 
+	  fold_r = data.frame(test1 = numeric(),
+                              test2 = numeric(),
+                              admitted = logical())
 	  while(fold < fold_size) {
 	    index <- sample(1:nrow(dataset), 1)
-	    fold_r <- dataset[index, ]
+	    fold_r <- rbind(fold_r, dataset[index, ]) 
 	    fold = fold + 1
 	  }
 	  dataset_split <- rbind(dataset_split, fold_r)

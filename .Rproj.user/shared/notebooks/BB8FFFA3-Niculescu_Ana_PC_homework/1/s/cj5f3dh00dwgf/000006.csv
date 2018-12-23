@@ -1,0 +1,7 @@
+"0","exam_x = read.delim(""data/ex4x.dat"", sep = "" "")"
+"0","exam_y = read.delim(""data/ex4y.dat"")"
+"0","# cleaning the data "
+"0","exam_x <- exam_x[ ,c(4, 7)]"
+"0","colnames(exam_x) <- c(""test1"", ""test2"")"
+"0","colnames(exam_y) <- ""admitted"""
+"0","exam_df <- dplyr::bind_cols(exam_x, exam_y)"
