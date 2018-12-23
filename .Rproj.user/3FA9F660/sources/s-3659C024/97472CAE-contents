@@ -1,0 +1,202 @@
+---
+title: "Parallel computing report"
+author: "Niculescu Ana-Maria"
+date: "December 22, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+## Purpose
+Using Newton’s Method to implement logistic regression on a classification problem.
+
+## Chosen dataset
+In order to test the implementation of the required functions for this project, the following dataset has been chosen: 
+40 students who were admitted to college and 40 students who were not admitted, and their corresponding grades for 2 exams.
+
+```{r}
+exam_x = read.delim("data/ex4x.dat", sep = " ")
+exam_y = read.delim("data/ex4y.dat")
+
+# cleaning the data 
+exam_x <- exam_x[ ,c(4, 7)]
+colnames(exam_x) <- c("test1", "test2")
+colnames(exam_y) <- "admitted"
+exam_df <- dplyr::bind_cols(exam_x, exam_y)
+```
+
+Plotting the data
+```{r}
+ggplot2::ggplot(exam_df, ggplot2::aes(x = test1, y = test2, col = as.factor(admitted))) +
+  ggplot2::geom_point()
+```
+
+
+###  1. Maximum log-likelihood using Newton-Raphson algorithm 
+basic.mle function takes as input argument the subset of the relevant variables and the variable to predict. This function returns the maximum likelihood estimator. This estimator is given by a Newton-Raphson algorithm.
+Newton’s method, similarly to gradient descent, is a way to search for the 0(minimum) of the derivative of the cost function.
+```{r}
+# sigmoid
+g = function (z) {
+  return (1 / (1 + exp(-z) ))
+} # plot(g(c(1,2,3,4,5,6)))
+
+# hypothesis 
+h = function (x,th) {
+  return( g(x %*% th) )
+} # h(x,th)
+
+# cost
+J = function (x,y,th,m) {
+  return( 1/m * sum(-y * log(h(x,th)) - (1 - y) * log(1 - h(x,th))) )
+} # J(x,y,th,m)
+
+# derivative of J (gradient)
+grad = function (x,y,th,m) {
+  return( 1/m * t(x) %*% (h(x, th) - y))
+} # grad(x,y,th,m)
+
+# Hessian
+H = function (x,y,th,m) {
+  return (1/m * t(x) %*% x * diag(h(x,th)) * diag(1 - h(x,th)))
+} # H(x,y,th,m)
+
+basic.mle <- function(x, y) {
+  j = array(0, c(10,1))
+  m = length(x$test1)
+  # eliminate matrix, use for to see what happens to the dataframe
+  x = matrix(c(rep(1, m), x$test1, x$test2), ncol=3)
+  y_calc = matrix(y$admitted, ncol=1)
+  th = matrix(0,3)
+  for (i in 1:10) {
+     #update j at every iteration and keep only the last j calculated
+      j = J(x, y, th, m) # stores each iteration Cost
+      th = th - solve(H(x,y_calc,th,m)) %*% grad(x,y_calc,th,m) 
+  }
+  th
+}
+
+theta <- basic.mle(exam_x, exam_y)
+
+# -16.38
+# 0.1483
+# 0.1589
+# Model = theta[1] + theta[2] * x$test1 + theta[3] * x$test_2
+y_test <- theta[1] + theta[2] * 20 + theta[3] * 80
+```
+
+
+```{r}
+basic.cv <- function(dataset, var) {
+  n_folds = 4
+  dataset_copy <- dataset
+  fold_size <- as.numeric(nrow(dataset) / n_folds)
+  dataset_split <- data.frame(test1 = numeric(),
+                              test2 = numeric(),
+                              admitted = logical())
+  browser()
+	for (i in 1:n_folds) { 
+	  fold = 0
+	  while(fold < fold_size) {
+	    index <- sample(1:nrow(dataset), 1)
+	    fold_r <- dataset[index, ]
+	    fold = fold + 1
+	  }
+	  dataset_split <- rbind(dataset_split, fold_r)
+	  dataset_split
+ }
+}
+
+x <- basic.cv(exam_df, 1)
+```
+
+
+```{r}
+basic.modelcomparison <- function() {
+  
+}
+```
+
+
+```{r}
+basic.modelselection <- function() {
+  
+}
+```
+
+
+### Testing methods 
+
+```{r}
+
+```
+
+
+### Code monitoring
+```{r}
+
+```
+
+
+### Alternatives
+
+```{r}
+mle <- function(x, y) {
+  # add intercept term to predictors
+  x$intercept = 1
+  # initialise fitting parameters
+  theta = numeric(3)
+  # sigmoid function
+  g = 
+  for (i in 1:100) {
+    
+  }
+}
+```
+
+
+```{r}
+cv <- function(sample, var) {
+  
+}
+```
+
+
+```{r}
+modelcomparison <- function() {
+  
+}
+```
+
+
+```{r}
+modelselection <- function() {
+  
+}
+```
+
+### Illustrate the gain
+
+
+```{r}
+
+```
+
+
+### Testing methods 
+
+```{r}
+
+```
+
+
+```{r}
+
+```

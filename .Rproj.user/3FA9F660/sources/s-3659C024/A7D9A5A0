@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1545318246407.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1634037631",
+    "id" : "A7D9A5A0",
+    "lastKnownWriteTime" : 1545518748,
+    "last_content_update" : 1545518748307,
+    "path" : "~/Documents/ENSAI/Parrallel_Computing/Parallel_Computing_Project/functions.R",
+    "project_path" : "functions.R",
+    "properties" : {
+        "cursorPosition" : "10,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
