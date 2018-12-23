@@ -114,7 +114,12 @@ basic.cv2 <- function(dataset, var) {
     test_indexes <- which(folds==i, arr.ind=TRUE)
     test_data <- dataset[test_indexes, ]
     train_data <- dataset[-test_indexes, ]
-    #Use the test and train data partitions however you desire...
+    # train model using basic.mle
+    thetas <- basic.mle(train_data[, c("test1", "test2"), ], train_data$admitted)
+    # use thetas to predict the model in test_data
+    predicted_admitted <- thetas[1] + thetas[2] * test_data$test1 + thetas[3] * test_data$test2
+    predicted_admitted <- ifelse(predicted_admitted > 0.5, 1, 0)
+    # test prediction
     
   }
 }
