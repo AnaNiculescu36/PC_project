@@ -1,2 +1,0 @@
-"0","ggplot2::ggplot(exam_df, ggplot2::aes(x = test1, y = test2, col = as.factor(admitted))) +"
-"0","  ggplot2::geom_point()"
