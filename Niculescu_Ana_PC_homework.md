@@ -5,11 +5,10 @@ date: "December 22, 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-```{r}
+
+
+```r
 library(dplyr)
 library(ggplot2)
 ```
@@ -21,7 +20,8 @@ Using Newton’s Method to implement logistic regression on a classification pro
 In order to test the implementation of the required functions for this project, the following dataset has been chosen: 
 40 students who were admitted to college and 40 students who were not admitted, and their corresponding grades for 2 exams.
 
-```{r}
+
+```r
 exam_x = read.delim("data/ex4x.dat", sep = " ")
 exam_y = read.delim("data/ex4y.dat")
 
@@ -33,10 +33,13 @@ exam_df <- dplyr::bind_cols(exam_x, exam_y)
 ```
 
 Plotting the data
-```{r}
+
+```r
 ggplot2::ggplot(exam_df, ggplot2::aes(x = test1, y = test2, col = as.factor(admitted))) +
   ggplot2::geom_point()
 ```
+
+![plot of chunk unnamed-chunk-18](Niculescu_Ana_PC_homework/unnamed-chunk-18-1.png)
 
 
 ###  1. Maximum log-likelihood using Newton-Raphson algorithm 
@@ -48,7 +51,8 @@ The method of maximum likelihood finds the values of the model parameter,
 {\displaystyle \theta } \theta , that maximize the likelihood function,
 {\displaystyle {\mathcal {L}}(\theta \,;x)} {\displaystyle {\mathcal {L}}(\theta \,;x)}.
 Intuitively, this selects the parameter values that make the data most probable.
-```{r}
+
+```r
 g = function (z) {
   return (1 / (1 + exp(-z) ))
 } # plot(g(c(1,2,3,4,5,6)))
@@ -109,7 +113,8 @@ y_test <- t(x_test) %*% theta
 
 2. Implement the function basic.cv which takes as input argument the sample and the set of the relevant variables. This function returns the estimator of the error of prediction obtained by cross-validation for any subset of covariates by using the MLE of the model. Use only basic instructions (like loops) and do not use any optimization techniques. 
 
-```{r}
+
+```r
 # the function returrns the cv error for each fold
 basic.cv <- function(sample, x_vars, y_var) {
   n_folds = 10
@@ -173,7 +178,8 @@ sample and a set of competing models. This function returns the best model
 Use only basic instructions (like loops) and do not use any optimization techniques. 
 
 
-```{r}
+
+```r
 # models argument is a list containing models as a form of named lists containing two vectors:
 # predictors and predicted
 # models argument is a list containing models as a form of named lists containing two vectors:
@@ -240,8 +246,8 @@ Backward Stepwise Selection begins will all p predictors in the model, then iter
 p pt a stice varibila adaugi/scoti
 cv pt a sti unde te opresti
 
-```{r}
 
+```r
 basic.modelselection <- function(sample, method, y_var) {
   
   sample_df_x <- exam_df_c[,!(names(exam_df_c) == y_var)]
@@ -315,13 +321,27 @@ while (TRUE) {
 basic.modelselection(exam_df_c, "forward", "admitted")
 ```
 
+```
+## $best_model
+## $best_model$predictors
+## [1] "test1" "test2"
+## 
+## $best_model$predicted
+## [1] "admitted"
+## 
+## 
+## $cv_error
+## [1] 0.225
+```
+
 
 
 ### Code monitoring
 
 #### basic.mle code monitoring
 
-```{r}
+
+```r
 library(microbenchmark)
 library(aprof)
 dump("basic.mle", file="basic_mle.R")
@@ -335,16 +355,63 @@ Rprof(append=FALSE)
 
 basic_mle_aprof <- aprof("basic_mle.R", "monprofil.Rout")
 plot(basic_mle_aprof)
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): specified source
+##       file basic_mle.R is not in the list of files in the
+##       profiler output: 
+##  <text>
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): Some aprof functions may fail --> user supplied source filebasic_mle.R does not seem to correspond to any file in the profiler output.
+##  Possible causes: 
+## 1) Source file was not profiled?
+## 2) Spelling?
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): Some line
+## calls stripped - BUGCODE: 02022016
+```
+
+```
+## Error in xy.coords(x, y, xlabel, ylabel, log): 'x' and 'y' lengths differ
+```
+
+```r
 Rprof(NULL)
 file.remove("Rprof.out")
-file.remove("monprofil.Rout")
-file.remove("basic_mle.R")
+```
 
+```
+## [1] TRUE
+```
+
+```r
+file.remove("monprofil.Rout")
+```
+
+```
+## [1] TRUE
+```
+
+```r
+file.remove("basic_mle.R")
+```
+
+```
+## [1] TRUE
+```
+
+```r
 #system.time(theta <- basic.mle(exam_x, exam_y$admitted))
 #out <- microbenchmark(theta <- basic.mle(exam_x, exam_y$admitted), unit = "ms")
 #boxplot(out)
-
 ```
+
+![plot of chunk unnamed-chunk-23](Niculescu_Ana_PC_homework/unnamed-chunk-23-1.png)
 
 
 #### basic.cv code monitoring
@@ -352,13 +419,17 @@ As it can be noticed from the aprof plot output, the most demanding lines are th
 is calling the function basic.mle as well as the line transforming a dataframe into a matrix.
 On the further section, we will try to find an alternative for the matrix transformation.
 
-```{r}
+
+```r
 exam_df_c <- exam_df %>%
   dplyr::mutate(test3 = test2 ^ 2)
 out <- microbenchmark(x <- basic.cv(exam_df_c, c("test1", "test2", "test3"), "admitted"), unit = "ms")
 boxplot(out)
+```
 
+![plot of chunk unnamed-chunk-24](Niculescu_Ana_PC_homework/unnamed-chunk-24-1.png)
 
+```r
 dump("basic.cv", file="basic_cv.R")
 source("basic_cv.R")
 
@@ -370,18 +441,63 @@ Rprof(append=FALSE)
 
 basic_cv_aprof <- aprof("basic_cv.R", "monprofil2.Rout")
 plot(basic_cv_aprof)
-Rprof(NULL)
-file.remove("Rprof.out")
-file.remove("monprofil2.Rout")
-file.remove("basic_cv.R")
+```
 
 ```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): specified source
+##       file basic_cv.R is not in the list of files in the
+##       profiler output: 
+##  <text>
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): Some aprof functions may fail --> user supplied source filebasic_cv.R does not seem to correspond to any file in the profiler output.
+##  Possible causes: 
+## 1) Source file was not profiled?
+## 2) Spelling?
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): Some line
+## calls stripped - BUGCODE: 02022016
+```
+
+```
+## Error in xy.coords(x, y, xlabel, ylabel, log): 'x' and 'y' lengths differ
+```
+
+```r
+Rprof(NULL)
+file.remove("Rprof.out")
+```
+
+```
+## [1] TRUE
+```
+
+```r
+file.remove("monprofil2.Rout")
+```
+
+```
+## [1] TRUE
+```
+
+```r
+file.remove("basic_cv.R")
+```
+
+```
+## [1] TRUE
+```
+
+![plot of chunk unnamed-chunk-24](Niculescu_Ana_PC_homework/unnamed-chunk-24-2.png)
 
 
 #### basic.modelcomparison code monitoring
 
-```{r}
 
+```r
 exam_df_c <- exam_df %>%
   dplyr::mutate(test3 = test2 ^ 2)
 # out <- microbenchmark(best <- basic.modelcomparison(exam_df_c, models_list), unit = "ms")
@@ -398,19 +514,70 @@ Rprof(append=FALSE)
 
 basic_mc_aprof <- aprof("basic_modelcomparison.R", "monprofil3.Rout")
 plot(basic_mc_aprof)
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): specified source
+##       file basic_modelcomparison.R is not in the list of files in the
+##       profiler output: 
+##  <text>
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): Some aprof functions may fail --> user supplied source filebasic_modelcomparison.R does not seem to correspond to any file in the profiler output.
+##  Possible causes: 
+## 1) Source file was not profiled?
+## 2) Spelling?
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): Some line
+## calls stripped - BUGCODE: 02022016
+```
+
+```
+## Error in xy.coords(x, y, xlabel, ylabel, log): 'x' and 'y' lengths differ
+```
+
+```r
 Rprof(NULL)
 file.remove("Rprof.out")
+```
+
+```
+## [1] TRUE
+```
+
+```r
 file.remove("monprofil3.Rout")
+```
+
+```
+## [1] TRUE
+```
+
+```r
 file.remove("basic_modelcomparison.R")
 ```
+
+```
+## [1] TRUE
+```
+
+![plot of chunk unnamed-chunk-25](Niculescu_Ana_PC_homework/unnamed-chunk-25-1.png)
 
 
 #### basic.modelselection code monitoring
 
-```{r}
+
+```r
 out <- microbenchmark(basic.modelselection(exam_df_c, "forward", "admitted"), unit = "ms")
 boxplot(out)
+```
 
+![plot of chunk unnamed-chunk-26](Niculescu_Ana_PC_homework/unnamed-chunk-26-1.png)
+
+```r
 dump("basic.modelselection", file="basic_modelselection.R")
 source("basic_modelselection.R")
 
@@ -418,27 +585,88 @@ Rprof("monprofil4.Rout",
 line.profiling = TRUE,
 interval = 0.01)
 basic.modelselection(exam_df_c, "forward", "admitted")
+```
+
+```
+## $best_model
+## $best_model$predictors
+## [1] "test1" "test2"
+## 
+## $best_model$predicted
+## [1] "admitted"
+## 
+## 
+## $cv_error
+## [1] 0.225
+```
+
+```r
 Rprof(append=FALSE)
 
 basic_ms_aprof <- aprof("basic_modelselection.R", "monprofil4.Rout")
 plot(basic_ms_aprof)
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): specified source
+##       file basic_modelselection.R is not in the list of files in the
+##       profiler output: 
+##  <text>
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): Some aprof functions may fail --> user supplied source filebasic_modelselection.R does not seem to correspond to any file in the profiler output.
+##  Possible causes: 
+## 1) Source file was not profiled?
+## 2) Spelling?
+```
+
+```
+## Warning in readLineDensity(aprofobject, Memprof = AddMemProf): Some line
+## calls stripped - BUGCODE: 02022016
+```
+
+```
+## Error in xy.coords(x, y, xlabel, ylabel, log): 'x' and 'y' lengths differ
+```
+
+```r
 Rprof(NULL)
 file.remove("Rprof.out")
+```
+
+```
+## [1] TRUE
+```
+
+```r
 file.remove("monprofil4.Rout")
+```
+
+```
+## [1] TRUE
+```
+
+```r
 file.remove("basic_modelselection.R")
 ```
+
+```
+## [1] TRUE
+```
+
+![plot of chunk unnamed-chunk-26](Niculescu_Ana_PC_homework/unnamed-chunk-26-2.png)
 
 
 ### Alternatives
 
-```{r}
 
-```
 
 
 ### Cross validation function improvement
 
-```{r}
+
+```r
 # first step to improve the basic.cv function is to create 
 # folds using the cut function. This way, the iteration with for loop
 # through the dataset is no longer required
@@ -488,7 +716,8 @@ basic.cv1 <- function(sample, x_vars, y_var) {
 ```
 
 
-```{r}
+
+```r
 # For the second approach, instead of looping through each
 # row of the dataframe, transforming it into a matrix at each
 # iteration (which is time consuming, as seen with aprof)
@@ -526,12 +755,11 @@ basic.cv2 <- function(sample, x_vars, y_var) {
   }
   mean(error_c)
 }
-
 ```
 
 
-```{r}
 
+```r
 # the third approach is based on parrallelisation
 # of task on 3 cores for the most part of the function
 
@@ -577,13 +805,13 @@ basic.cv3 <- function(sample, x_vars, y_var) {
   return(mean(unlist(error_c)))
   on.exit(stopCluster(cl))
 }
-
 ```
 
 
 As it can be noticed, parrallelisation does outperform the
 original function, but it is not do better than the other optimised versions.
-```{r}
+
+```r
 exam_df_c <- exam_df %>%
   dplyr::mutate(test3 = test2 ^ 2)
 
@@ -591,17 +819,33 @@ set.seed(1)
 x <- basic.cv(exam_df_c, c("test1", "test2", "test3"), "admitted")
 x1 <- basic.cv1(exam_df_c, c("test1", "test2", "test3"), "admitted")
 all.equal(x, x1)
+```
 
+```
+## [1] TRUE
+```
+
+```r
 x <- basic.cv(exam_df_c, c("test1", "test2", "test3"), "admitted")
 x2 <- basic.cv2(exam_df_c, c("test1", "test2", "test3"), "admitted")
 all.equal(x, x2)
+```
 
+```
+## [1] TRUE
+```
 
+```r
 x <- basic.cv(exam_df_c, c("test1", "test2", "test3"), "admitted")
 x3 <- basic.cv3(exam_df_c, c("test1", "test2", "test3"), "admitted")
 all.equal(x, x3)
+```
 
+```
+## [1] TRUE
+```
 
+```r
 microbenchmark(
   x <- basic.cv(exam_df_c, c("test1", "test2", "test3"), "admitted"),
   x1 <- basic.cv1(exam_df_c, c("test1", "test2", "test3"), "admitted"),
@@ -609,10 +853,25 @@ microbenchmark(
   x3 <- basic.cv3(exam_df_c, c("test1", "test2", "test3"), "admitted"))
 ```
 
+```
+## Unit: milliseconds
+##                                                                  expr
+##    x <- basic.cv(exam_df_c, c("test1", "test2", "test3"), "admitted")
+##  x1 <- basic.cv1(exam_df_c, c("test1", "test2", "test3"), "admitted")
+##  x2 <- basic.cv2(exam_df_c, c("test1", "test2", "test3"), "admitted")
+##  x3 <- basic.cv3(exam_df_c, c("test1", "test2", "test3"), "admitted")
+##       min        lq      mean    median        uq      max neval
+##   43.4711  45.02220  51.53217  49.96025  54.92990  86.5708   100
+##   40.3538  43.07515  48.04745  45.88250  50.93315  99.3505   100
+##   26.0136  27.06625  30.02534  29.32320  31.21460  45.8472   100
+##  279.0583 294.23195 303.77822 299.26380 307.70185 399.4801   100
+```
+
 
 ### Model Comparison function improvement
 
-```{r}
+
+```r
 # Better: purr parr aplly on list, calc cv for each element, which.min error
 basic.modelcomparison1 <- function(sample, models) {
   if (length(models) < 2) {
@@ -635,7 +894,8 @@ basic.modelcomparison1 <- function(sample, models) {
 ```
 
 
-```{r}
+
+```r
 no_cores <- detectCores() - 1
 cl <- makeCluster(no_cores)
 
@@ -677,12 +937,11 @@ models_list <- list(list(
     predictors = c("test1", "test2"),
     predicted = c("admitted"))
 )
-
-
 ```
 
 
-```{r}
+
+```r
 # add another variable to the dataset to illustrate the way function 
 # works
 exam_df_c <- exam_df %>%
@@ -690,19 +949,45 @@ exam_df_c <- exam_df %>%
 best <- basic.modelcomparison(exam_df_c, models_list)
 best <- basic.modelcomparison1(exam_df_c, models_list)
 all.equal(best, best1) 
+```
 
+```
+## Error in mode(current): object 'best1' not found
+```
+
+```r
 best2 <- basic.modelcomparison2(exam_df_c, models_list)
 all.equal(best, best2)
+```
 
+```
+## [1] "Component \"cv_error\": Modes: numeric, list"              
+## [2] "Component \"cv_error\": target is numeric, current is list"
+```
+
+```r
 microbenchmark(
   best <- basic.modelcomparison(exam_df_c, models_list),
   best1 <- basic.modelcomparison1(exam_df_c, models_list),
   best2 <- basic.modelcomparison2(exam_df_c, models_list))
 ```
 
+```
+## Unit: milliseconds
+##                                                     expr      min
+##    best <- basic.modelcomparison(exam_df_c, models_list)  88.7021
+##  best1 <- basic.modelcomparison1(exam_df_c, models_list)  57.1272
+##  best2 <- basic.modelcomparison2(exam_df_c, models_list) 403.8808
+##         lq      mean    median        uq      max neval
+##   94.85175 102.31610  99.78005 106.24485 211.9753   100
+##   60.44970  66.50073  64.21145  69.87365 126.1192   100
+##  424.38815 437.25372 431.84370 445.92030 526.8764   100
+```
 
 
-```{r}
+
+
+```r
 basic.modelselection <- function(sample, method, y_var) {
   
   sample_df_x <- exam_df_c[,!(names(exam_df_c) == y_var)]
@@ -992,36 +1277,59 @@ basic.modelselection3 <- function(sample, method, y_var) {
 bm <- basic.modelselection(exam_df_c, "forward", "admitted")
 bm1 <- basic.modelselection1(exam_df_c, "forward", "admitted")
 all.equal(bm, bm1)
+```
 
+```
+## [1] TRUE
+```
+
+```r
 bm <- basic.modelselection(exam_df_c, "forward", "admitted")
 bm2 <- basic.modelselection2(exam_df_c, "forward", "admitted")
 all.equal(bm, bm2)
+```
 
+```
+## [1] TRUE
+```
+
+```r
 bm <- basic.modelselection(exam_df_c, "forward", "admitted")
 bm3 <- basic.modelselection3(exam_df_c, "forward", "admitted")
 all.equal(bm, bm3)
+```
 
+```
+## [1] TRUE
+```
 
+```r
 microbenchmark(bm <- basic.modelselection(exam_df_c, "forward", "admitted"),
                bm1 <- basic.modelselection1(exam_df_c, "forward", "admitted"),
                bm2 <- basic.modelselection2(exam_df_c, "forward", "admitted"),
                bm3 <- basic.modelselection2(exam_df_c, "forward", "admitted"))
+```
 
-
+```
+## Unit: milliseconds
+##                                                            expr      min
+##    bm <- basic.modelselection(exam_df_c, "forward", "admitted") 437.8353
+##  bm1 <- basic.modelselection1(exam_df_c, "forward", "admitted") 287.0517
+##  bm2 <- basic.modelselection2(exam_df_c, "forward", "admitted") 844.9157
+##  bm3 <- basic.modelselection2(exam_df_c, "forward", "admitted") 838.3474
+##        lq     mean   median       uq       max neval
+##  459.5553 483.5680 467.0114 477.0172  896.0087   100
+##  300.1062 314.3514 307.5300 314.4231  506.3465   100
+##  870.3755 915.7300 882.6033 909.8019 1523.0561   100
+##  868.1686 900.9996 880.6591 904.1984 1355.0381   100
 ```
 
 
-```{r}
-
-```
 
 
 
-```{r}
-
-```
 
 
-```{r}
 
-```
+
+
